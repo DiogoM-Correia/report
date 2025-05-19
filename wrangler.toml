@@ -1,0 +1,19 @@
+name = "porto-tech-news"
+main = "src/index.js"
+compatibility_date = "2023-11-10"
+
+# KV Namespaces for storage
+kv_namespaces = [
+  { binding = "SEEN_ARTICLES", id = "your-kv-id-for-seen-articles", preview_id = "your-preview-id-for-seen-articles" },
+  { binding = "REPORTS", id = "your-kv-id-for-reports", preview_id = "your-preview-id-for-reports" }
+]
+
+# Secret environment variables
+# Configure these via: wrangler secret put NAME
+# - EMAIL_API_KEY
+# - GPT4ALL_API_KEY
+# - GPT4ALL_ENDPOINT
+
+# Cron Trigger for daily report
+[[triggers]]
+crons = ["0 10 * * *"] # 10:00 UTC (11:00 Europe/Lisbon) 

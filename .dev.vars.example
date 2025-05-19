@@ -1,0 +1,7 @@
+# Copy this file to .dev.vars for local development
+EMAIL_API_KEY=your_sendgrid_or_mailgun_api_key
+EMAIL_FROM=porto-tech-news@example.com
+EMAIL_TO=recipient@example.com
+GPT4ALL_ENDPOINT=https://your-language-model-api-endpoint
+GPT4ALL_API_KEY=your_api_key_if_required
+FEED_LIST=https://feed.infoq.com/articles,https://news.ycombinator.com/rss 

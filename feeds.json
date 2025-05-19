@@ -1,0 +1,14 @@
+{
+  "feeds": [
+    "https://feed.infoq.com/articles",
+    "https://news.ycombinator.com/rss",
+    "https://thenewstack.io/feed",
+    "https://www.techmeme.com/feed.xml",
+    "https://www.techinporto.com/feed/",
+    "https://www.portugaltechnews.com/feed/",
+    "https://blog.portodigital.pt/rss.xml",
+    "https://portoio.com/feed/",
+    "https://startupsatporto.com/feed/",
+    "https://scaleupporto.pt/feed/"
+  ]
+} 
