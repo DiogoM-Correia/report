@@ -1,39 +1,24 @@
 # Porto Tech News
 
-A serverless news aggregator and summarizer focused on the Portuguese tech scene, particularly Porto's tech ecosystem. Built on Cloudflare Workers.
+A serverless tech news aggregator for Porto/Portugal, powered by Cloudflare Workers.
 
-## Overview
+## Features
 
-This service fetches news from various RSS feeds, filters for recent and unseen articles, categorizes them, summarizes them using AI, and sends a daily email report.
+- 📰 Fetches tech news from multiple RSS sources
+- 🤖 Summarizes articles using Hugging Face AI
+- 📊 Categorizes news into investments, Portuguese news, global news, and events
+- 📧 Delivers daily reports via email
+- ⏱️ Runs on a daily schedule via Cloudflare Workers
+- 🔄 Deduplicates articles to avoid repeats
 
-The report includes:
-- VC investments and funding rounds
-- Market moves in the Portuguese tech scene
-- Global tech news and trends
-- Upcoming events (if available)
-
-## Architecture
-
-```mermaid
-flowchart LR
-  subgraph Cloudflare
-    CT[Cron Trigger @10:00 UTC daily] --> W[Worker: run-report]
-    W --> F[Fetch RSS / News APIs]
-    W --> K1[Workers KV: dedup log]
-    W --> S[Synthesizer: call your summarization API]
-    W --> E[Email via external SMTP/API]
-    W --> K2[Workers KV: archive JSON report]
-  end
-```
-
-## Setup
+## Setup Instructions
 
 ### Prerequisites
 
-- [Cloudflare Workers Account](https://workers.cloudflare.com/)
-- [Wrangler CLI](https://developers.cloudflare.com/workers/wrangler/install-and-update/)
-- Email provider account (SendGrid or Mailgun recommended)
-- GPT4All or other language model API endpoint
+- Node.js and npm installed
+- Cloudflare account
+- Hugging Face account (free)
+- SendGrid account (free tier available)
 
 ### Installation
 
@@ -42,80 +27,77 @@ flowchart LR
    ```
    npm install
    ```
-3. Configure your KV namespaces:
+
+3. Copy the environment template to create your development variables:
    ```
-   wrangler kv:namespace create SEEN_ARTICLES
-   wrangler kv:namespace create REPORTS
+   cp env.template .dev.vars
+   see results -> http://127.0.0.1:8787/latest-report?format=html
    ```
-4. Update the KV namespace IDs in `wrangler.toml` with the ones you received from the commands above
 
-### Configuration
+4. Fill in the required values in `.dev.vars`:
+   - `EMAIL_API_KEY`: Your SendGrid API key
+   - `EMAIL_FROM`: Your verified sender email in SendGrid
+   - `EMAIL_TO`: Email address to receive reports
+   - `HUGGINGFACE_API_KEY`: API token from your Hugging Face account
+   - `FEED_LIST`: (Optional) Comma-separated list of RSS feed URLs
 
-Set the following secrets using Wrangler:
+### Setting up Cloudflare Workers
 
-```bash
-wrangler secret put EMAIL_API_KEY
-wrangler secret put EMAIL_FROM
-wrangler secret put EMAIL_TO
-wrangler secret put GPT4ALL_ENDPOINT
-wrangler secret put GPT4ALL_API_KEY
-wrangler secret put FEED_LIST
-```
+1. Login to Cloudflare:
+   ```
+   npx wrangler login
+   ```
 
-- `EMAIL_API_KEY`: Your SendGrid or Mailgun API key
-- `EMAIL_FROM`: Sender email address
-- `EMAIL_TO`: Recipient email address
-- `GPT4ALL_ENDPOINT`: URL to your language model API
-- `GPT4ALL_API_KEY`: API key for your language model (if required)
-- `FEED_LIST`: Comma-separated list of RSS feed URLs (optional)
+2. Create KV namespaces for storage:
+   ```
+   npx wrangler kv:namespace create SEEN_ARTICLES
+   npx wrangler kv:namespace create REPORTS
+   ```
 
-### Deployment
+3. Update the `wrangler.toml` file with your namespace IDs from step 2
 
-Deploy to Cloudflare Workers:
+4. Upload the secrets to Cloudflare:
+   ```
+   npx wrangler secret put EMAIL_API_KEY
+   npx wrangler secret put EMAIL_FROM
+   npx wrangler secret put EMAIL_TO
+   npx wrangler secret put HUGGINGFACE_API_KEY
+   ```
 
-```bash
-npm run deploy
-```
-
-## Usage
-
-The service runs automatically every day at 10:00 UTC (11:00 Europe/Lisbon) via Cloudflare's Cron Triggers.
-
-You can also trigger it manually by sending a POST request to your Worker:
-
-```
-curl -X POST "https://porto-tech-news.<your-subdomain>.workers.dev/run-report"
-```
-
-## Customization
-
-### Email Provider
-
-By default, the service uses SendGrid for sending emails. To switch to Mailgun, modify the `EMAIL_PROVIDER` constant in `src/index.js`:
-
-```javascript
-const EMAIL_PROVIDER = 'mailgun';
-```
-
-For Mailgun, update the endpoint in the configuration with your domain:
-
-```javascript
-endpoint: 'https://api.mailgun.net/v3/YOUR_DOMAIN_NAME/messages',
-```
-
-### RSS Feeds
-
-The default feeds can be customized by setting the `FEED_LIST` secret to a comma-separated list of RSS feed URLs.
-
-## Development
+### Local Development
 
 Run the worker locally:
-
-```bash
+```
 npm start
 ```
 
-This will start a local development server where you can test the worker.
+Test the report generation:
+```
+curl -X POST http://localhost:8787/run-report
+```
+
+### Deployment
+
+Deploy to Cloudflare:
+```
+npm run deploy
+```
+
+## Configuration
+
+### RSS Feeds
+
+Edit the `DEFAULT_FEEDS` array in `src/index.js` or set the `FEED_LIST` environment variable to customize the news sources.
+
+### Report Schedule
+
+Edit the cron schedule in `wrangler.toml` to change when reports are generated and sent.
+
+## Troubleshooting
+
+- **Email Errors**: Ensure your SendGrid sender identity is verified
+- **AI Errors**: Check your Hugging Face API key and model status
+- **Empty Reports**: Adjust the recency filter or check RSS feed validity
 
 ## License
 
